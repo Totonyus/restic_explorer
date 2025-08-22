@@ -1,0 +1,440 @@
+.level_container {
+    display: block;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px;
+}
+
+.table_header {
+    padding: 10px 0;
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#snapshot_details {
+    font-size: large;
+    color: dimgrey;
+}
+
+.placeholder {
+    display: inline-block;
+    width: 25px;
+    margin-bottom: 6.5px;
+}
+
+.attribute {
+    display: inline-block;
+    width: 80px;
+    text-align: end;
+}
+
+.top_button {
+    width: 160px !important;
+    text-align: center;
+    border: solid 1px darkgray;
+    border-radius: 5px;
+    padding: 10px 0;
+    background-color: lightgreen;
+}
+
+.top_buttons_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.top_buttons_header > div {
+    height: inherit;
+}
+
+.inline_checkbox {
+    text-align: center;
+}
+
+.include {
+    color: darkgreen;
+}
+
+.exclude {
+    color: darkred;
+}
+
+.nested_level {
+    display: flex;
+    width: 100%;
+}
+
+.header_content, .command_line_input {
+    width: -webkit-fill-available;
+}
+
+.header:hover {
+    background-color: lightgray;
+}
+
+.expand {
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.date {
+    width: 125px
+}
+
+body, input, select, option {
+    font-family: monospace;
+}
+
+.attribute_header {
+    font-weight: bold;
+}
+
+.centered {
+    text-align: center;
+}
+
+.vr {
+    border-left: 1px solid lightgray;
+    width: 9px;
+}
+
+.vr_before, .vr {
+    display: inline-block;
+    height: 100%;
+}
+
+.vr_before {
+    width: 10px;
+}
+
+.placeholder:hover .vr {
+    border-left: 1px solid darkgray;
+}
+
+#loading_animation {
+    text-align: center;
+}
+
+.lds-ellipsis {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.lds-ellipsis div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: lightgray;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.lds-ellipsis div:nth-child(1) {
+    left: 8px;
+    animation: lds-ellipsis1 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(2) {
+    left: 8px;
+    animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(3) {
+    left: 32px;
+    animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(4) {
+    left: 56px;
+    animation: lds-ellipsis3 0.6s infinite;
+}
+
+@keyframes lds-ellipsis1 {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes lds-ellipsis3 {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes lds-ellipsis2 {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(24px, 0);
+    }
+}
+
+select.button {
+    border: unset;
+}
+
+.button {
+    user-select: none;
+    cursor: pointer;
+    padding: 5px 35px;
+    box-shadow: 0px 0px 12px -8px rgba(0, 0, 0, 0.5);
+    line-height: 1.25;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+    transition: background-color 0.6s ease;
+    overflow: hidden;
+}
+
+.button:after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 50%;
+    left: 50%;
+    transform-style: flat;
+    transform: translate3d(-50%, -50%, 0);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 100%;
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.action_button, .action_button {
+    background-color: lightblue;
+    padding: 5px 15px;
+}
+
+.action_button:focus, .action_button:hover {
+    background: cornflowerblue;
+}
+
+.button:active:after {
+    width: 200px;
+    height: 200px;
+}
+
+.reverse_sorting_button.active, .reverse_sorting_button:hover {
+    background-color: lightgreen;
+}
+
+.reverse_sorting_button > input {
+    display: none;
+}
+
+.index_content {
+    display: flex;
+}
+
+.index_content > .expand {
+    margin-right: 10px;
+}
+
+.index_content > div {
+    align-self: center;
+}
+
+.size {
+    height: 100%;
+    display: flex;
+    place-items: center;
+}
+
+.table_header > .attribute, .size > .attribute {
+    margin-left: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .expand > img {
+        -webkit-filter: invert(0.7);
+    }
+
+    body {
+        color: #eee;
+        background-color: #1a1a1a;
+    }
+
+    input, select {
+        background-color: #4d4d4d;
+        color: #eee;
+    }
+
+    .top_button {
+        border: solid 1px darkgray;
+        background-color: lightgreen;
+    }
+
+    .include {
+        color: #b6ffb6;
+    }
+
+    .exclude {
+        color: #dd9f9f;
+    }
+
+    .header:hover {
+        background-color: #4d4d4d;
+    }
+
+    .vr {
+        border-left: 1px solid #848484;
+    }
+
+    hr {
+        border-color: #848484;
+    }
+
+    .placeholder:hover .vr {
+        border-left: 1px solid darkgray;
+    }
+
+    .lds-ellipsis div {
+        background: lightgray;
+    }
+
+    .button {
+        box-shadow: 0px 0px 12px -8px rgba(0, 0, 0, 0.5);
+    }
+
+
+    .action_button, .action_button {
+        background-color: #2d5664;
+    }
+
+    .action_button:focus, .action_button:hover {
+        background: #2f682f;
+    }
+
+    .reverse_sorting_button.active, .reverse_sorting_button:hover {
+        background-color: #2f682f;
+    }
+}
+
+
+.repo_snapshots_container {
+    margin-bottom: 20px;
+}
+
+.snapshot_container {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.snapshot_container > span {
+    display: inline-block;
+    /*background-color: #608d9c;*/
+    align-content: center;
+
+}
+
+.snapshot_container > span.snap_id {
+    width: 10%;
+}
+
+.snapshot_container > span.snap_date {
+    width: 15%;
+}
+
+.snapshot_container > span.snap_files {
+    width: 10%;
+}
+
+.snapshot_container > span.snap_size {
+    width: 10%;
+    align-content: center;
+}
+
+.snapshot_container > span.snap_added {
+    width: 10%;
+}
+
+.snapshot_container > span.actions {
+    width: 15%;
+}
+
+.repo_snapshots_container_header > span{
+    /*text-align: center;*/
+    font-weight: bolder;
+    font-size: x-large;
+}
+
+.snapshot {
+    font-size: large;
+}
+
+.snapshot > span.actions {
+    text-align: center;
+}
+
+.mount_button {
+    background-color: #35b335;
+    text-align: center;
+}
+
+.explore_button {
+    background-color: #1e66d1;
+}
+
+.refresh_cache_button {
+    background-color: #d52525;
+}
+
+.mount_button, .explore_button, .refresh_cache_button {
+    padding: 10px 15px;
+    color: white;
+    font-weight: bolder;
+    border-radius: 7px;
+    text-align: center;
+
+}
+
+
+div.repo_name {
+    font-weight: bolder;
+    font-size: xx-large;
+    margin: 10px
+}
+
+div.repo_name > span.cache_information {
+    font-weight: 100;
+    color: dimgrey;
+    font-size: large;
+}
+
+.hidden {
+    display: none;
+}
+
+.updown_indicator > img {
+    vertical-align: middle;
+}
+
+.no_snapshot_available{
+    color:red;
+    font-size: x-large;
+    text-align: center;
+    font-weight: bolder;
+    margin: 20px
+}

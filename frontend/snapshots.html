@@ -1,0 +1,68 @@
+<head>
+    <script src="commons.js"></script>
+    <script src="snapshots_engine.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Restic explorer</title>
+    <link rel="icon" href="favicon.png" type="image/x-icon"/>
+</head>
+
+<div>
+    <div id="content">
+        <div id="loading_animation">
+            <div class="lds-ellipsis">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const get_repo_template = function (repo_name, repo) {
+        return `
+        <div class="repo_container">
+        <div class="repo_name">
+            <span class="updown_indicator"><img src="up.png"/></span>
+            ${repo_name} - ${repo.params.url}
+            <span class="cache_information">
+                (restic explorer cache : ${get_linux_date_format(repo.params.cache_date * 1000)})
+            </span>
+        </div>
+        <span id="snapshot_container_${repo_name}" >
+        <div class="snapshot_container repo_snapshots_container_header">
+            <span class="snap_id">id</span>
+            <span class="snap_date">Date</span>
+            <span class="snap_files">Files</span>
+            <span class="snap_size">Size</span>
+            <span class="snap_added">Added</span>
+            <span class="actions button mount_button">MOUNT</span>
+        </div>
+
+        <div class="repo_snapshots_container"></div>
+        </span>
+        </div>`
+    }
+
+    const get_snapshot_template = function (snapshot) {
+        return `<div class="snapshot_container snapshot">
+                    <span class="snap_id">${snapshot.short_id}</span>
+                    <span class="snap_date">${get_linux_date_format(snapshot.time)}</span>
+                    <span class="snap_files">${snapshot.summary.total_files_processed}</span>
+                    <span class="snap_size">${file_size(snapshot.summary.total_bytes_processed)}</span>
+                    <span class="snap_added">+${file_size(snapshot.summary.data_added)}</span>
+                    <span class="actions button explore_button">EXPLORE</span>
+                </div>
+                <hr class='sec_sep'>`
+    }
+
+    init_core({
+        api_url: 'snapshots',
+        report_type: 'snapshots',
+        repo_template_method: get_repo_template,
+        snapshot_template_method: get_snapshot_template
+    })
+
+    init_request()
+</script>

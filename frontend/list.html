@@ -1,0 +1,134 @@
+<head>
+    <script src="commons.js"></script>
+    <script src="core.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Restic explorer</title>
+    <link rel="icon" href="favicon.png" type="image/x-icon"/>
+</head>
+
+<div>
+    <h2 id="repository_title"></h2>
+    <h3 id="snapshot_details"></h3>
+
+    <div><input class='command_line_input' id='command_line_input' type='text' value=''
+                onfocus='(()=>{event.target.select()})()'/></div>
+
+    <div class='top_buttons_header'>
+        <div>
+            Sort by :
+            <select class="button" id="sorting_method" onchange="change_sort_method()">
+                <option selected value="name">Name</option>
+                <option value="added_size">Size</option>
+            </select>
+
+            <span class="reverse_sorting_button button"
+                  onclick="(()=>{event.target.firstChild.checked = !event.target.firstChild.checked; change_sort_method()})(); event.target.classList.toggle('active')"><input
+                    type="checkbox" id="reverse_sorting" value="Reverse"> Reverse sorting</span>
+        </div>
+
+        <div>
+<!--            <div class="attribute action_button button" style="width: unset!important;"-->
+<!--                 onclick="generate_export_tar_command(event)">-->
+<!--                Export tar-->
+<!--            </div>-->
+            <div class="attribute action_button button" style="width: unset!important;"
+                 onclick="generate_extract_command(event)">
+                Restore
+            </div>
+        </div>
+    </div>
+
+    <div class='top_buttons_header'>
+        <span style="width: 5%">
+        Go to
+        </span>
+        <span style="width: 90%">
+            <input id='goto_input' style="width: 100%" type="text">
+        </span>
+        <span style="width: 5%; text-align: center">
+        <a class="action_button button" onclick="goto_button_click(event)"> > </a>
+        </span>
+    </div>
+
+    <div class='table_header'>
+        <span class="attribute_header attribute">Size</span>
+        <span class="attribute_header attribute date">Date</span>
+        <span class="attribute_header centered attribute include">Include</span>
+        <span class="attribute_header centered attribute exclude">Exclude</span>
+    </div>
+
+    <div id="content">
+        <div id="loading_animation">
+            <div class="lds-ellipsis">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const query_repo = urlParams.get('repo')
+    const query_snapshot1 = urlParams.get('snapshot1')
+    const query_force_refresh = urlParams.get('force_refresh')
+
+    const get_html_template = function (index, level) {
+        const level_data = level['/info'];
+        const level_path = level['/info']['path'];
+        const level_icon = get_level_icon(level)
+
+        return `
+       <div class='level_container'>
+        <div class='header' id="${level_path}">
+
+        <span class="index_content">
+        ${level_icon !== null ? `<div class='expand'><img src="${level_icon}"/></div>` : `<div class='expand'> </div>`}
+        <div>${!level_data['l'] ? index : `${index} -> ${level_data.l}`}</div>
+        </span>
+
+        <span class='size'>
+
+        <span class="attribute added_size">${file_size(level_data.size)} </span>
+
+        <span class="attribute date">${get_linux_date_format(level_data.mtime)}</span>
+
+        <span class="attribute include inline_checkbox"><input data-type="include" type="checkbox" ${include_list[level_path] ? 'checked' : ''} /></span>
+        <span class="attribute exclude inline_checkbox"><input data-type="exclude" type="checkbox" ${exclude_list[level_path] ? 'checked' : ''} /></span>
+
+        </span>
+        </div>
+
+        <hr class='sec_sep'>
+
+        <div class='nested_level'></div>
+        </div>`
+    }
+
+    init_core({
+        repo: query_repo,
+        snapshot: query_snapshot1,
+        api_url: (()=>{
+            if (query_force_refresh === 'true'){
+                return `repo/${query_repo}/files/${query_snapshot1}?force_refresh=${query_force_refresh}`
+            }
+            return `repo/${query_repo}/files/${query_snapshot1}`
+        })(),
+        template_method: get_html_template,
+        get_data: (level) => {
+            return level['/info']
+        },
+        get_path: (level) => {
+            return level["/info"]['path']
+        },
+        sort_function: alphabetical_sort,
+        report_type: "list"
+    })
+
+    init_request();
+</script>
+
+

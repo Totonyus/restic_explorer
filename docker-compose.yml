@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  restic_explorer:
+    image: totonyus/restic_explorer
+    container_name: restic_explorer
+    restart: unless-stopped
+    ports:
+      - "5000:8000"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./params:/app/params
