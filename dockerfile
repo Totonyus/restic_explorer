@@ -11,7 +11,7 @@ COPY requirements /app/
 COPY *.py /app/
 COPY frontend/* /app/frontend/
 COPY params/params_sample.ini /app/setup/params.ini
-COPY entrypoint.sh restic /app/
+COPY --chmod=755 entrypoint.sh restic ./
 
 RUN python3 -m pip install -r requirements
 
