@@ -30,7 +30,7 @@ const build_repo_list = function(repo_list){
         const mount_button = repo_html_content_dom.querySelector('.mount_button');
         mount_button.addEventListener('click', (e) => {
             prompt('Mount command',
-                `${app_config.app.restic_executable_path} --repo "${repo.params.url}" --password-file ".secrets/${repo_name}" mount "${repo.params.backup_mountpoint}" `);
+                `${app_config.app.restic_executable_path} --repo "${repo.params.url}" --password-file ".secrets/${repo_name}" mount "${app_config.app.backup_mountpoint}" `);
         })
 
         if (repo.snapshots != null) {
