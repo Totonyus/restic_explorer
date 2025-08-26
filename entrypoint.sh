@@ -14,7 +14,7 @@ chmod a+x entrypoint.sh
 
 if [ "$DEBUG" == "DEBUG" ]; then
   echo ~~~ Launching DEBUG mode ~~~
-  uvicorn main.py:app --reload --port 8000 --host 0.0.0.0 --reload-include='*.py' --reload-include='frontend/*'
+  uvicorn main:app --reload --port 8000 --host 0.0.0.0 --reload-include='*.py' --reload-include='frontend/*'
 else
   python3 main.py
 fi

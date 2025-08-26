@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  restic_explorer:
+    container_name: restic_explorer
+    build:
+      context: .
+      dockerfile: dockerfile
+    restart: unless-stopped
+    ports:
+      - "5000:8000"
+    environment:
+      - DEBUG=DEBUG
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./test/params:/app/params
+      - ./engine.py:/app/engine.py
+      - ./main.py:/app/main.py
+      - ./entrypoint.sh:/app/entrypoint.sh
+      - ./frontend/snapshots.html:/app/frontend/snapshots.html
+      - ./frontend/snapshots_engine.js:/app/frontend/snapshots_engine.js
+      - ./frontend/style.css:/app/frontend/style.css

@@ -12,6 +12,7 @@ default_params = {
         'logs_rotation': 7,
         'restic_executable_path' : 'restic',
         'backup_mountpoint' : '/backup',
+        'mount_command_append' : '',
 
         'snapshots_list_cache_file_retention': 24,
         'snapshot_cache_file_retention': 72,
