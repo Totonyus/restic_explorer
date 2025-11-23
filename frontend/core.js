@@ -87,6 +87,18 @@ const diff_size_sort = function (a, b) {
     return sorting_reversed ? -sorting_result : sorting_result;
 }
 
+const nb_files_sort = function (a, b) {
+    let sorting_result = -1;
+
+    if (a[0] !== '/info' && b[0] !== '/info') {
+        const a_added = a[1]['/info']['nb_files']
+        const b_added = b[1]['/info']['nb_files']
+        sorting_result = b_added - a_added;
+    }
+
+    return sorting_reversed ? -sorting_result : sorting_result;
+}
+
 const build_nested_levels = function (level, nested_level_dom, target) {
     const placeholder_dom = document.createElement('div')
     placeholder_dom.classList.add('placeholder')
@@ -168,7 +180,7 @@ const checkbox_click_event = function (event, path, type) {
 }
 
 // On restic you cannot use --include and --exclude in the same command
-const checkbox_block_other = function() {
+const checkbox_block_other = function () {
     const count_included = Object.values(include_list).filter(Boolean).length;
     const count_excluded = Object.values(exclude_list).filter(Boolean).length;
 
@@ -311,6 +323,8 @@ const set_sort_method = function () {
         sort_function = diff_size_sort;
     } else if (sorting_method === 'name') {
         sort_function = alphabetical_sort;
+    } else if (sorting_method === 'nb_files') {
+        sort_function = nb_files_sort;
     }
 }
 

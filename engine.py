@@ -58,11 +58,22 @@ def calculate_size(object):
                 calculated_list.append(results)
 
         added_total = 0
+        nb_files = 0
 
         for calculated_item in calculated_list:  # on fait la somme de tous les enfants
             added_total += int(calculated_item.get('size'))
 
+            if calculated_item.get('nb_files') != None:
+                if calculated_item.get('type') != "dir":
+                    nb_files += calculated_item.get('nb_files') + 1
+                else:
+                    nb_files += calculated_item.get('nb_files')
+            else:
+                if calculated_item.get('type') != "dir":
+                    nb_files += 1
+
         object[data_parameter_name]['size'] = added_total
+        object[data_parameter_name]['nb_files'] = nb_files
 
     return object.get(data_parameter_name)
 

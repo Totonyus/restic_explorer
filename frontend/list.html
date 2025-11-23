@@ -19,6 +19,7 @@
             <select class="button" id="sorting_method" onchange="change_sort_method()">
                 <option selected value="name">Name</option>
                 <option value="added_size">Size</option>
+                <option value="nb_files">Nb_files</option>
             </select>
 
             <span class="reverse_sorting_button button"
@@ -52,6 +53,7 @@
 
     <div class='table_header'>
         <span class="attribute_header attribute">Size</span>
+        <span class="attribute_header attribute">Files</span>
         <span class="attribute_header attribute date">Date</span>
         <span class="attribute_header centered attribute include">Include</span>
         <span class="attribute_header centered attribute exclude">Exclude</span>
@@ -91,14 +93,13 @@
         </span>
 
         <span class='size'>
-
         <span class="attribute added_size">${file_size(level_data.size)} </span>
+        <span class="attribute nb_files">${level_data.nb_files ? level_data.nb_files : ''}</span>
 
         <span class="attribute date">${get_linux_date_format(level_data.mtime)}</span>
 
         <span class="attribute include inline_checkbox"><input data-type="include" type="checkbox" ${include_list[level_path] ? 'checked' : ''} /></span>
         <span class="attribute exclude inline_checkbox"><input data-type="exclude" type="checkbox" ${exclude_list[level_path] ? 'checked' : ''} /></span>
-
         </span>
         </div>
 
