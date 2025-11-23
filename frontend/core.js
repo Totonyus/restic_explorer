@@ -91,8 +91,8 @@ const nb_files_sort = function (a, b) {
     let sorting_result = -1;
 
     if (a[0] !== '/info' && b[0] !== '/info') {
-        const a_added = a[1]['/info']['nb_files']
-        const b_added = b[1]['/info']['nb_files']
+        const a_added = a[1]['/info']['nb_files'] ? a[1]['/info']['nb_files'] : 0
+        const b_added = b[1]['/info']['nb_files'] ? b[1]['/info']['nb_files'] : 0
         sorting_result = b_added - a_added;
     }
 
