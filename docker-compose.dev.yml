@@ -14,9 +14,13 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./test/params:/app/params
+      - ./test/cache:/app/.cache
       - ./engine.py:/app/engine.py
       - ./main.py:/app/main.py
+      - ./params_utils.py:/app/params_utils.py
       - ./entrypoint.sh:/app/entrypoint.sh
       - ./frontend/snapshots.html:/app/frontend/snapshots.html
+      - ./frontend/list.html:/app/frontend/list.html
       - ./frontend/snapshots_engine.js:/app/frontend/snapshots_engine.js
+      - ./frontend/core.js:/app/frontend/core.js
       - ./frontend/style.css:/app/frontend/style.css

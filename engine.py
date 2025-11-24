@@ -5,6 +5,7 @@ import logging
 import json
 from datetime import date, timedelta, datetime
 import logging
+import re
 
 import params_utils
 
@@ -78,7 +79,7 @@ def calculate_size(object):
     return object.get(data_parameter_name)
 
 
-def convert_path_in_object(data_object, single_line_object):
+def convert_path_in_object(data_object, single_line_object, repo):
     path = single_line_object.get('path')
 
     parts = [p for p in path.split('/') if p]
@@ -91,7 +92,23 @@ def convert_path_in_object(data_object, single_line_object):
             'path': single_line_object.get('path'),
             'mtime': single_line_object.get('mtime'),
             'size': single_line_object.get('size'),
+            'hidden': is_hidden_path(single_line_object.get('path'), repo)
         }})
+
+
+def is_hidden_path(path, repo):
+    try:
+        for item in __pu.get('app').get('ignore_path'):
+            if re.match(item, path):
+                return True
+
+        for item in __pu.get('repo').get(repo).get('ignore_path', []):
+            if re.match(item, path):
+                return True
+    except re.PatternError as e:  # can fail with some strange file names like [
+        pass
+
+    return False
 
 
 def generate_secret_files():
@@ -197,11 +214,13 @@ def get_snapshot_files(repo, snapshot_id, ignore_cache=False):
 
         for line in raw[1:-1]:  # The fist line is a summary
             if line != '':
-                convert_path_in_object(snapshot_data, json.loads(line.strip()))
+                convert_path_in_object(snapshot_data, json.loads(line.strip()), repo=repo)
 
         calculate_size(snapshot_data)
+        final_object = snapshot_data.copy()
+        remove_hidden(snapshot_data, final_object)
         cache_file = open(cache_filename, 'w')
-        json.dump(snapshot_data, cache_file)
+        json.dump(final_object, cache_file)
         cache_file.close()
 
         metadata_file = open(f'{cache_filename}.metadata', 'w')
@@ -214,7 +233,7 @@ def get_snapshot_files(repo, snapshot_id, ignore_cache=False):
                 logging.info(f'Using cache file : {cache_filename}')
 
                 cache_file = open(cache_filename, 'r')
-                snapshot_data = json.load(cache_file)
+                final_object = json.load(cache_file)
                 cache_file.close()
 
                 cache_file = open(f'{cache_filename}.metadata', 'r')
@@ -224,4 +243,20 @@ def get_snapshot_files(repo, snapshot_id, ignore_cache=False):
                 logging.error('get_snapshot_files : Cannot use cache, trying without cache')
                 return get_snapshot_files(repo=repo, snapshot_id=snapshot_id, ignore_cache=True)
 
-    return metadata, snapshot_data
+    return metadata, final_object
+
+
+def remove_hidden(object, final_object):
+    data_parameter_name = '/info'
+
+    hidden = object.get(data_parameter_name).get('hidden', False)
+    for entry in object:
+        if hidden is False:
+            if entry != data_parameter_name and final_object is not None:
+                remove_hidden(object.get(entry), final_object.get(entry, None))
+        else:
+            if entry != data_parameter_name:
+                final_object[entry] = None
+            else:
+                final_object[data_parameter_name] = object.get(data_parameter_name).copy()
+

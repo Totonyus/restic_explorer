@@ -1,4 +1,5 @@
-let repository, archive1, archive2, api_url, app_config, template_method, get_path, get_data, sort_function, report_type,
+let repository, archive1, archive2, api_url, app_config, template_method, get_path, get_data, sort_function,
+    report_type,
     sorting_reversed = false
 
 const init_core = function (object) {
@@ -158,6 +159,10 @@ const is_file = function (level) {
 }
 
 const get_level_icon = function (level) {
+    if (level['/info'].hidden) {
+        return 'folder_lock.png'
+    }
+
     return {
         'file': null,
         'dir': 'folder_plus.png',
@@ -260,7 +265,9 @@ const build_level = function (index, level, target) {
     const header_dom_object = html_content_dom.querySelector(`div.header`);
 
     header_dom_object.addEventListener('click', (event) => {
-        on_level_click(event, level, nested_level_dom, header_dom_object);
+        if (!level['/info'].hidden) {
+            on_level_click(event, level, nested_level_dom, header_dom_object);
+        }
     });
 
     if (is_level_file) {

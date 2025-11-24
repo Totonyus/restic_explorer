@@ -16,13 +16,13 @@ default_params = {
 
         'snapshots_list_cache_file_retention': 24,
         'snapshot_cache_file_retention': 72,
-    },
-
+        'ignore_path': []
+    }
 }
 
 params_metadata = {
     'int': ['listen_port' 'logs_rotation', 'snapshots_list_cache_file_retention', 'snapshot_cache_file_retention'],
-    'array': [],
+    'array': ['ignore_path'],
     'cannot_be_none': {"repo:" : ['url', 'password']},
     'fixed_values': {},
     'censored_fields' : ['password']
@@ -88,7 +88,7 @@ class ConfigManager:
                             f'params.ini [{config_file_section}] : Value {option} must be an integer, using default value ({local_default_params.get(option)}) instead')
                 elif option in params_metadata.get('array'):
                     section_parameters.setdefault(section, {})[option] = self.__app_config.get(section=config_file_section,
-                                                                                               option=option).split(',')
+                                                                                               option=option).split('\n')
                 else:
                     section_parameters.setdefault(section, {})[option] = self.__app_config.get(section=config_file_section,
                                                                                                option=option)
