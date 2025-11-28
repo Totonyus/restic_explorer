@@ -23,6 +23,8 @@ async def access_ui():
 
 @app.get('/api/snapshots')
 async def get_snapshots(request: Request, response: Response, force_refresh='false'):
+    engine.clear_cache()
+
     return {
         "data": engine.get_all_snapshots(ignore_cache=force_refresh != 'false'),
         "config" : __pu.get_all_censored()
