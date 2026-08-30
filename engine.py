@@ -168,8 +168,13 @@ def get_all_snapshots_for_repo(repo, ignore_cache=False):
     refresh_cache, cache_filename = check_if_cache_available(key, 'snapshots')
 
     if refresh_cache or ignore_cache:
+        command = ['./restic', '--repo', url, '--password-file', f'.secrets/{key}', 'snapshots', '--json']
+        if item.get('tag', None) is not None:
+            command.append('--tag')
+            command.append(item.get('tag'))
+
         command_result = subprocess.run(
-            ['./restic', '--repo', url, '--password-file', f'.secrets/{key}', 'snapshots', '--json'],
+            command,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         if command_result.returncode != 0:
