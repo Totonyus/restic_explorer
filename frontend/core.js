@@ -14,13 +14,28 @@ const init_core = function (object) {
 }
 
 const init_dom_informations = function () {
-    document.getElementById('repository_title').innerHTML = `${query_repo} - ${metadata.short_id} (${get_linux_date_format(metadata.summary.backup_end)})`;
-    document.getElementById('snapshot_details').innerHTML =
-        `Files changed : ${metadata.summary.files_changed + metadata.summary.files_new}, ` +
-        `Data added : ${file_size(metadata.summary.data_added)}, ` +
-        `Total size : ${file_size(metadata.summary.total_bytes_processed)} (${metadata.summary.total_files_processed} files)`;
+    let repo = app_config.repo[query_repo].tag.split(':')
+    repo.shift()
+    if (report_type === "diff"){
+        document.getElementById('repository_title').innerHTML = `${query_repo} : ${metadata.target_snapshot} - ${metadata.source_snapshot}` ;
+        document.getElementById('snapshot_details').innerHTML =
+            `Data added : ${file_size(metadata.added.bytes)}, ` +
+            `Files added : ${metadata.added.files}` +
+            '<br/>' +
+            `Data removed : ${file_size(metadata.removed.bytes)}, ` +
+            `Files removed : ${metadata.removed.files}`
 
-    document.getElementById('command_line_input').value = `${app_config.app.restic_executable_path} --repo "${app_config.repo[query_repo].url}" --password-file ".secrets/${query_repo}" ls "${metadata.short_id}"`;
+        document.getElementById('command_line_input').value = `${app_config.app.restic_executable_path} --repo "${app_config.repo[query_repo].url}" --password-file ".secrets/${repo[0]}" diff ${metadata.target_snapshot} ${metadata.source_snapshot}`;
+
+    }else {
+        document.getElementById('repository_title').innerHTML = `${query_repo} - ${metadata.short_id} (${get_linux_date_format(metadata.summary.backup_end)})`;
+        document.getElementById('snapshot_details').innerHTML =
+            `Files changed : ${metadata.summary.files_changed + metadata.summary.files_new}, ` +
+            `Data added : ${file_size(metadata.summary.data_added)}, ` +
+            `Total size : ${file_size(metadata.summary.total_bytes_processed)} (${metadata.summary.total_files_processed} files)`;
+
+        document.getElementById('command_line_input').value = `${app_config.app.restic_executable_path} --repo "${app_config.repo[query_repo].url}" --password-file ".secrets/${repo[0]}" ls "${metadata.short_id}"`;
+    }
 
     document.title = `${query_repo} - ${metadata.short_id}`
 }
@@ -40,8 +55,8 @@ const added_size_sort = function (a, b) {
 
     if (report_type === "diff") {
         if (a[0] !== '/info' && b[0] !== '/info') {
-            const a_added = get_size_delta(a[1]['/info']['changes'][0], "added");
-            const b_added = get_size_delta(b[1]['/info']['changes'][0], "added");
+            const a_added = a[1]['/info'].total_added_size !== undefined ? a[1]['/info'].total_added_size : a[1]['/info'].size
+            const b_added = b[1]['/info'].total_added_size !== undefined ? b[1]['/info'].total_added_size : b[1]['/info'].size
 
             sorting_result = b_added - a_added;
         }
@@ -61,8 +76,8 @@ const removed_size_sort = function (a, b) {
 
     if (report_type === "diff") {
         if (a[0] !== '/info' && b[0] !== '/info') {
-            const a_removed = get_size_delta(a[1]['/info']['changes'][0], "removed");
-            const b_removed = get_size_delta(b[1]['/info']['changes'][0], "removed");
+            const a_removed = a[1]['/info'].total_removed_size !== undefined ? a[1]['/info'].total_removed_size : a[1]['/info'].old_size
+            const b_removed = b[1]['/info'].total_removed_size !== undefined ? b[1]['/info'].total_removed_size : b[1]['/info'].old_size
 
             sorting_result = b_removed - a_removed;
         }
@@ -76,10 +91,11 @@ const diff_size_sort = function (a, b) {
 
     if (report_type === "diff") {
         if (a[0] !== '/info' && b[0] !== '/info') {
-            const a_added = get_size_delta(a[1]['/info']['changes'][0], "added");
-            const a_removed = get_size_delta(a[1]['/info']['changes'][0], "removed");
-            const b_added = get_size_delta(b[1]['/info']['changes'][0], "added");
-            const b_removed = get_size_delta(b[1]['/info']['changes'][0], "removed");
+            const a_added = a[1]['/info'].total_added_size !== undefined ? a[1]['/info'].total_added_size : a[1]['/info'].size
+            const b_added = b[1]['/info'].total_added_size !== undefined ? b[1]['/info'].total_added_size : b[1]['/info'].size
+
+            const a_removed = a[1]['/info'].total_removed_size !== undefined ? a[1]['/info'].total_removed_size : a[1]['/info'].old_size
+            const b_removed = b[1]['/info'].total_removed_size !== undefined ? b[1]['/info'].total_removed_size : b[1]['/info'].old_size
 
             sorting_result = (b_added - b_removed) - (a_added - a_removed);
         }

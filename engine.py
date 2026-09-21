@@ -79,13 +79,18 @@ def calculate_size(object):
     return object.get(data_parameter_name)
 
 
-def convert_path_in_object(data_object, single_line_object, repo):
+def convert_path_in_object(data_object, single_line_object, repo, **kwargs):
     path = single_line_object.get('path')
 
     parts = [p for p in path.split('/') if p]
 
+    new = kwargs.get('new', None)
+    old = kwargs.get('old', None)
+
     converted = data_object
-    for item in parts:
+    path = ''
+    for index, item in enumerate(parts):
+        path = path + '/' + item
         converted = converted.setdefault(item, {'/info': {
             'name': single_line_object.get('name'),
             'type': single_line_object.get('type'),
@@ -94,6 +99,28 @@ def convert_path_in_object(data_object, single_line_object, repo):
             'size': single_line_object.get('size'),
             'hidden': is_hidden_path(single_line_object.get('path'), repo)
         }})
+
+        if new is not None or old is not None:
+            converted.get('/info')['size'] = None
+            converted.get('/info')['mtime'] = None
+            converted.get('/info')['name'] = item
+            converted.get('/info')['path'] = path
+
+            if index != parts.index(parts[-1]):
+                converted.get('/info')['type'] = 'dir'
+
+    if new is not None or old is not None:
+        converted.get('/info')['modifier'] = kwargs.get('modifier')
+        converted.get('/info')['old_size'] = None
+        converted.get('/info')['old_mtime'] = None
+
+    if new is not None and new != {}:
+        converted.get('/info')['size'] = new.get('/info').get('size')
+        converted.get('/info')['mtime'] = new.get('/info').get('mtime')
+
+    if old is not None and old != {}:
+        converted.get('/info')['old_size'] = old.get('/info').get('size')
+        converted.get('/info')['old_mtime'] = old.get('/info').get('mtime')
 
 
 def is_hidden_path(path, repo):
@@ -265,3 +292,127 @@ def remove_hidden(object, final_object):
             else:
                 final_object[data_parameter_name] = object.get(data_parameter_name).copy()
 
+
+def get_diff(repo, snapshot1_id, snapshot2_id, force_refresh=False, ignore_cache=False):
+    repos_list = __pu.get('repo')
+
+    refresh_cache, cache_filename = check_if_cache_available(repo, f'{snapshot1_id}_{snapshot2_id}.diff')
+
+    if refresh_cache or ignore_cache:
+        if repos_list.get(repo, None) is None:
+            return '{ "message_type": "exit_error", "message" : "Unknown repository" }', None
+
+        command_result = subprocess.run(
+            ['./restic', '--repo', repos_list[repo].get('url'), '--password-file', f'.secrets/{repo}', 'diff',
+             snapshot2_id, snapshot1_id, '--json'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        raw = command_result.stdout.split('\n')
+
+        metadata1, result1 = get_snapshot_files(repo, snapshot1_id, False)
+        metadata2, result2 = get_snapshot_files(repo, snapshot2_id, False)
+
+        diff_object = {'/info': {'size': None, 'path': ''}}
+
+        for diff in raw[0:-2]:
+            item_obj = json.loads(diff)
+            item_path = item_obj.get('path').split('/')[1:]
+
+            print(item_obj)
+            current_new = result1
+            try:
+                for key in item_path:
+                    current_new = current_new.get(key, {})
+                new = current_new
+            except AttributeError:
+                new = None
+
+            current_old = result2
+            try:
+                for key in item_path:
+                    current_old = current_old.get(key, {})
+
+                old = current_old.copy()
+            except AttributeError:
+                old = None
+
+            if current_new != {} and current_new is not None:
+                convert_path_in_object(diff_object, new.get('/info'), repo, old=old, new=new,
+                                       modifier=item_obj.get('modifier'))
+            elif current_old != {} and current_old is not None:
+                convert_path_in_object(diff_object, old.get('/info'), repo, old=old, new=new,
+                                       modifier=item_obj.get('modifier'))
+
+        calculate_diff_size(diff_object)
+
+        cache_file = open(cache_filename, 'w')
+        json.dump(diff_object, cache_file)
+        cache_file.close()
+
+        metadata_file = open(f'{cache_filename}.metadata', 'w')
+        metadata = json.loads(raw[-2])
+        json.dump(metadata, metadata_file)
+        metadata_file.close()
+        return metadata, diff_object
+    else:
+        if not ignore_cache:
+            try:
+                logging.info(f'Using cache file : {cache_filename}')
+
+                cache_file = open(cache_filename, 'r')
+                diff_object = json.load(cache_file)
+                cache_file.close()
+
+                cache_file = open(f'{cache_filename}.metadata', 'r')
+                metadata = json.load(cache_file)
+                cache_file.close()
+                return metadata, diff_object
+            except:
+                logging.error('get_diff : Cannot use cache, trying without cache')
+                return get_diff(repo=repo, snapshot1_id=snapshot1_id, snapshot2_id=snapshot2_id, ignore_cache=True)
+
+
+def calculate_diff_size(object):
+    data_parameter_name = '/info'
+
+    if object.get(data_parameter_name).get('path') == '' or object.get(data_parameter_name).get(
+            'type') == 'dir':  # si présent = c'est un fichier, sinon, c'est un répertoire avec des enfants
+        calculated_list = []
+        for entry in object:  # On récupère la valeur de tous les enfants
+            if entry != data_parameter_name:
+                results = calculate_diff_size(object.get(entry))
+                calculated_list.append(results)
+
+        total_added_size = 0
+        total_removed_size = 0
+        total_added_files = 0
+        total_removed_files = 0
+        total_changed_files = 0
+
+        for calculated_item in calculated_list:  # on fait la somme de tous les enfants
+            if calculated_item.get('modifier', None) == '-':
+                total_removed_size = total_removed_size + calculated_item.get('old_size')
+                total_removed_files = total_removed_files + 1
+            elif calculated_item.get('modifier', None) == '+':
+                total_added_size = total_added_size + calculated_item.get('size')
+                total_added_files = total_added_files + 1
+            elif calculated_item.get('modifier', None) == 'M':
+                total_changed_files = total_changed_files + 1
+                if calculated_item.get('old_size') > calculated_item.get('size'):
+                    total_removed_size = total_removed_size + (
+                            calculated_item.get('old_size') - calculated_item.get('size'))
+                else:
+                    total_added_size = total_added_size + (
+                            calculated_item.get('size') - calculated_item.get('old_size'))
+            if calculated_item.get('size') is None and calculated_item.get('old_size') is None:
+                total_added_size = total_added_size + calculated_item.get('total_added_size', 0)
+                total_removed_size = total_removed_size + calculated_item.get('total_removed_size', 0)
+                total_added_files = total_added_files + calculated_item.get('total_added_files', 0)
+                total_removed_files = total_removed_files + calculated_item.get('total_removed_files', 0)
+                total_changed_files = total_changed_files + calculated_item.get('total_changed_files', 0)
+
+        object[data_parameter_name]['total_added_size'] = total_added_size
+        object[data_parameter_name]['total_removed_size'] = total_removed_size
+        object[data_parameter_name]['total_added_files'] = total_added_files
+        object[data_parameter_name]['total_removed_files'] = total_removed_files
+        object[data_parameter_name]['total_changed_files'] = total_changed_files
+
+    return object.get(data_parameter_name)

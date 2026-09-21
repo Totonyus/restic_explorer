@@ -10,7 +10,7 @@ const init_core = function (object) {
 }
 
 
-const build_repo_list = function(repo_list){
+const build_repo_list = function (repo_list) {
     const main_container_dom = document.getElementById('content');
     remove_all_children(main_container_dom);
 
@@ -22,7 +22,7 @@ const build_repo_list = function(repo_list){
         const container = repo_html_content_dom.getElementById(`snapshot_container_${repo_name}`)
         const updown_indicator = repo_html_content_dom.querySelector('.updown_indicator>img')
 
-        repo_name_dom.addEventListener('click', ()=>{
+        repo_name_dom.addEventListener('click', () => {
             let state = toggle_class(container, 'hidden')
             updown_indicator.src = state === 'added' ? 'down.png' : 'up.png'
         })
@@ -35,7 +35,7 @@ const build_repo_list = function(repo_list){
 
         if (repo.snapshots != null) {
             for (let [snapshot_index, snapshot] of Object.entries(repo.snapshots.reverse())) {
-                const snapshot_html_content_dom = document.createRange().createContextualFragment(snapshot_template_method(snapshot));
+                const snapshot_html_content_dom = document.createRange().createContextualFragment(snapshot_template_method(snapshot, repo_name));
 
                 const explore_button = snapshot_html_content_dom.querySelector('.explore_button')
                 explore_button.addEventListener('click', (e) => {
@@ -45,7 +45,7 @@ const build_repo_list = function(repo_list){
                 repo_snapshots_containers.appendChild(snapshot_html_content_dom)
 
             }
-        }else{
+        } else {
             const snapshot_html_content_dom = document.createRange().createContextualFragment(`<div class='no_snapshot_available'>An error occured : ${repo.params.error.message}</div>`);
             repo_snapshots_containers.appendChild(snapshot_html_content_dom)
 
@@ -55,12 +55,42 @@ const build_repo_list = function(repo_list){
 
     const refresh_cache_button = document.createRange().createContextualFragment(`<div id="refresh_cache_button" class="button refresh_cache_button">Refresh cache</div>`)
     const button = refresh_cache_button.getElementById('refresh_cache_button')
-    button.addEventListener('click', ()=>{
+    button.addEventListener('click', () => {
         replace_loading_animation()
         init_request('?force_refresh=true')
     })
 
     main_container_dom.appendChild(refresh_cache_button)
+
+    // Gestion des checkboxes
+    for (let input of document.querySelectorAll(`input[type=checkbox]`)) {
+        input.addEventListener('change', (e) => {
+            let same_repo_unchecked = document.querySelectorAll(`input[type=checkbox][data-repo=${e.target.dataset.repo}]:not(:checked)`)
+            let same_repo_checked = document.querySelectorAll(`input[type=checkbox][data-repo=${e.target.dataset.repo}]:checked`)
+            let diff_button  = document.querySelector(`span.button.diff_button[data-repo=${e.target.dataset.repo}]`)
+
+            for (let checkbox of same_repo_unchecked) {
+                checkbox.disabled = same_repo_checked.length > 1
+            }
+
+            if (same_repo_checked.length > 1){
+                diff_button.classList.remove('disabled')
+                diff_button.dataset.disabled = "false"
+            }else{
+                diff_button.classList.add('disabled')
+                diff_button.dataset.disabled = "true"
+            }
+        })
+    }
+
+    for (let diff_button of document.querySelectorAll('span.diff_button')){
+        diff_button.addEventListener('click', (e)=>{
+            if (e.target.dataset.disabled === "false"){
+                let same_repo_checked = document.querySelectorAll(`input[type=checkbox][data-repo=${e.target.dataset.repo}]:checked`)
+                window.open(`/ui/diff.html?repo=${e.target.dataset.repo}&snapshot1=${same_repo_checked[0].dataset.snapshot}&snapshot2=${same_repo_checked[1].dataset.snapshot}`)
+            }
+        })
+    }
 }
 
 const init_request = function (param = '') {
@@ -80,11 +110,11 @@ const remove_all_children = function (dom_object) {
     }
 }
 
-const replace_loading_animation = function() {
+const replace_loading_animation = function () {
     const content_dom_element = document.getElementById('content')
     remove_all_children(content_dom_element)
 
-    content_dom_element.innerHTML= `
+    content_dom_element.innerHTML = `
         <div id="loading_animation">
             <div class="lds-ellipsis">
                 <div></div>

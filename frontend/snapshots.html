@@ -38,6 +38,7 @@
             <span class="snap_size">Size</span>
             <span class="snap_added">Added</span>
             <span class="actions button mount_button">MOUNT</span>
+            <span class="actions button diff_button disabled" data-disabled=true data-repo="${repo_name}" >DIFF</span>
         </div>
 
         <div class="repo_snapshots_container"></div>
@@ -45,7 +46,7 @@
         </div>`
     }
 
-    const get_snapshot_template = function (snapshot) {
+    const get_snapshot_template = function (snapshot, repo_name) {
         return `<div class="snapshot_container snapshot">
                     <span class="snap_id">${snapshot.short_id}</span>
                     <span class="snap_date">${get_linux_date_format(snapshot.time)}</span>
@@ -53,6 +54,7 @@
                     <span class="snap_size">${file_size(snapshot.summary.total_bytes_processed)}</span>
                     <span class="snap_added">+${file_size(snapshot.summary.data_added)}</span>
                     <span class="actions button explore_button">EXPLORE</span>
+                    <span class="diff_check"><input type="checkbox" data-repo="${repo_name}" data-snapshot="${snapshot.short_id}" /></span>
                 </div>
                 <hr class='sec_sep'>`
     }

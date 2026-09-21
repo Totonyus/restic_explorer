@@ -371,10 +371,10 @@ select.button {
 }
 
 .snapshot_container > span.actions {
-    width: 15%;
+    width: 10%;
 }
 
-.repo_snapshots_container_header > span{
+.repo_snapshots_container_header > span {
     /*text-align: center;*/
     font-weight: bolder;
     font-size: x-large;
@@ -393,6 +393,16 @@ select.button {
     text-align: center;
 }
 
+.diff_button {
+    background-color: #e87511;
+    text-align: center;
+}
+
+.diff_button.disabled {
+    background-color: #71675d;
+    cursor: not-allowed;
+}
+
 .explore_button {
     background-color: #1e66d1;
 }
@@ -401,15 +411,20 @@ select.button {
     background-color: #d52525;
 }
 
-.mount_button, .explore_button, .refresh_cache_button {
+.mount_button, .explore_button, .refresh_cache_button, .diff_button {
     padding: 10px 15px;
     color: white;
     font-weight: bolder;
     border-radius: 7px;
     text-align: center;
-
 }
 
+.diff_check {
+    display: inline-block;
+    width: 10%;
+    text-align: center;
+    margin: 10px 15px;
+}
 
 div.repo_name {
     font-weight: bolder;
@@ -431,8 +446,8 @@ div.repo_name > span.cache_information {
     vertical-align: middle;
 }
 
-.no_snapshot_available{
-    color:red;
+.no_snapshot_available {
+    color: red;
     font-size: x-large;
     text-align: center;
     font-weight: bolder;

@@ -45,6 +45,15 @@ async def get_files_from_snapshot(request: Request, response: Response, repo, sn
         "config" : __pu.get_all_censored()
     }
 
+@app.get(f"/api/repo/{'{repo}'}/diff")
+async def get_diff(request: Request, response: Response, repo, snapshot1, snapshot2, force_refresh='false'):
+    metadata, data = engine.get_diff(repo, snapshot1, snapshot2, force_refresh)
+
+    return {
+        "metadata": metadata,
+        "data": data,
+        "config" : __pu.get_all_censored()
+    }
 
 if __name__ == '__main__':
     uvicorn.run(app, port=__pu.get('app').get('listen_port'), host=__pu.get('app').get('listen_host'))
